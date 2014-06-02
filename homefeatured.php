@@ -82,7 +82,10 @@ class HomeFeatured extends Module
 			if (!$nbr || $nbr <= 0 || !Validate::isInt($nbr))
 				$errors[] = $this->l('An invalid number of products has been specified.');
 			else
+			{
+				Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
 				Configuration::updateValue('HOME_FEATURED_NBR', (int)$nbr);
+			}
 			if (isset($errors) && count($errors))
 				$output .= $this->displayError(implode('<br />', $errors));
 			else
