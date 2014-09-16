@@ -50,6 +50,7 @@ class HomeFeatured extends Module
 	{
 		$this->_clearCache('*');
 		Configuration::updateValue('HOME_FEATURED_NBR', 8);
+		Configuration::updateValue('HOME_FEATURED_CAT', Context::getContext()->shop->getCategory());
 
 		if (!parent::install()
 			|| !$this->registerHook('header')
@@ -79,12 +80,17 @@ class HomeFeatured extends Module
 		if (Tools::isSubmit('submitHomeFeatured'))
 		{
 			$nbr = (int)Tools::getValue('HOME_FEATURED_NBR');
+			$cat = (int)Tools::getValue('HOME_FEATURED_CAT');
+			
 			if (!$nbr || $nbr <= 0 || !Validate::isInt($nbr))
 				$errors[] = $this->l('An invalid number of products has been specified.');
+			elseif (!$cat || $cat <= 0 || !Validate::isInt($cat))
+				$errors[] = $this->l('An invalid number has been specified for the category.');
 			else
 			{
 				Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
 				Configuration::updateValue('HOME_FEATURED_NBR', (int)$nbr);
+				Configuration::updateValue('HOME_FEATURED_CAT', (int)$cat);
 			}
 			if (isset($errors) && count($errors))
 				$output .= $this->displayError(implode('<br />', $errors));
@@ -111,9 +117,9 @@ class HomeFeatured extends Module
 	{
 		if (!isset(HomeFeatured::$cache_products))
 		{
-			$category = new Category(Context::getContext()->shop->getCategory(), (int)Context::getContext()->language->id);
+			$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'), (int)Context::getContext()->language->id);
 			$nb = (int)Configuration::get('HOME_FEATURED_NBR');
-			HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position');
+			HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position', null, false, true, true, ($nb ? $nb : 8));
 		}
 
 		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products))
@@ -193,6 +199,13 @@ class HomeFeatured extends Module
 						'class' => 'fixed-width-xs',
 						'desc' => $this->l('Set the number of products that you would like to display on homepage (default: 8).'),
 					),
+					array(
+						'type' => 'text',
+						'label' => $this->l('Category from which to pick products to be displayed'),
+						'name' => 'HOME_FEATURED_CAT',
+						'class' => 'fixed-width-xs',
+						'desc' => $this->l('Choose the category ID from which to pick the products that you would like to display on homepage (default: 2).'),
+					),
 				),
 				'submit' => array(
 					'title' => $this->l('Save'),
@@ -225,6 +238,7 @@ class HomeFeatured extends Module
 	{
 		return array(
 			'HOME_FEATURED_NBR' => Tools::getValue('HOME_FEATURED_NBR', Configuration::get('HOME_FEATURED_NBR')),
+			'HOME_FEATURED_CAT' => Tools::getValue('HOME_FEATURED_CAT', Configuration::get('HOME_FEATURED_CAT')),
 		);
 	}
 }
