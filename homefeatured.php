@@ -50,7 +50,7 @@ class HomeFeatured extends Module
 	{
 		$this->_clearCache('*');
 		Configuration::updateValue('HOME_FEATURED_NBR', 8);
-		Configuration::updateValue('HOME_FEATURED_CAT', Context::getContext()->shop->getCategory());
+		Configuration::updateValue('HOME_FEATURED_CAT', (int)Context::getContext()->shop->getCategory());
 		Configuration::updateValue('HOME_FEATURED_RANDOMIZE', false);
 
 		if (!parent::install()
@@ -93,12 +93,12 @@ class HomeFeatured extends Module
 				$errors[] = $this->l('Invalid value for the "randomize" flag.');
 			if (isset($errors) && count($errors))
 				$output = $this->displayError(implode('<br />', $errors));
-			else {
-				Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
+			else
+			{
 				Configuration::updateValue('HOME_FEATURED_NBR', (int)$nbr);
 				Configuration::updateValue('HOME_FEATURED_CAT', (int)$cat);
 				Configuration::updateValue('HOME_FEATURED_RANDOMIZE', (bool)$rand);
-
+				Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
 				$output = $this->displayConfirmation($this->l('Your settings have been updated.'));
 			}
 		}
@@ -264,9 +264,9 @@ class HomeFeatured extends Module
 	public function getConfigFieldsValues()
 	{
 		return array(
-			'HOME_FEATURED_NBR' => Tools::getValue('HOME_FEATURED_NBR', Configuration::get('HOME_FEATURED_NBR')),
-			'HOME_FEATURED_CAT' => Tools::getValue('HOME_FEATURED_CAT', Configuration::get('HOME_FEATURED_CAT')),
-			'HOME_FEATURED_RANDOMIZE' => Tools::getValue('HOME_FEATURED_RANDOMIZE', Configuration::get('HOME_FEATURED_RANDOMIZE')),
+			'HOME_FEATURED_NBR' => Tools::getValue('HOME_FEATURED_NBR', (int)Configuration::get('HOME_FEATURED_NBR')),
+			'HOME_FEATURED_CAT' => Tools::getValue('HOME_FEATURED_CAT', (int)Configuration::get('HOME_FEATURED_CAT')),
+			'HOME_FEATURED_RANDOMIZE' => Tools::getValue('HOME_FEATURED_RANDOMIZE', (bool)Configuration::get('HOME_FEATURED_RANDOMIZE')),
 		);
 	}
 }
