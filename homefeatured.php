@@ -82,11 +82,11 @@ class HomeFeatured extends Module
 		{
 			$nbr = Tools::getValue('HOME_FEATURED_NBR');
 			if (!Validate::isInt($nbr) || $nbr <= 0)
-			$errors[] = $this->l('An invalid number of products has been specified.');
+			$errors[] = $this->l('The number of products is invalid. Please enter a positive number.');
 
 			$cat = Tools::getValue('HOME_FEATURED_CAT');
 			if (!Validate::isInt($cat) || $cat <= 0)
-				$errors[] = $this->l('An invalid number has been specified for the category.');
+				$errors[] = $this->l('The category ID is invalid. Please choose an existing category ID.');
 				
 			$rand = Tools::getValue('HOME_FEATURED_RANDOMIZE');
 			if (!Validate::isBool($rand))
@@ -198,7 +198,7 @@ class HomeFeatured extends Module
 					'title' => $this->l('Settings'),
 					'icon' => 'icon-cogs'
 				),
-				'description' => $this->l('To add products to your homepage, simply add them to the selected product category (default: "Home").'),
+				'description' => $this->l('To add products to your homepage, simply add them to the corresponding product category (default: "Home").'),
 				'input' => array(
 					array(
 						'type' => 'text',
@@ -212,14 +212,14 @@ class HomeFeatured extends Module
 						'label' => $this->l('Category from which to pick products to be displayed'),
 						'name' => 'HOME_FEATURED_CAT',
 						'class' => 'fixed-width-xs',
-						'desc' => $this->l('Choose the category ID of the products that you would like to display on homepage (default: "Home").'),
+						'desc' => $this->l('Choose the category ID of the products that you would like to display on homepage (default: 2 for "Home").'),
 					),
 					array( 
 						'type' => 'switch',
-						'label' => $this->l('Order featured  products by random.'),
+						'label' => $this->l('Randomly display featured products'),
 						'name' => 'HOME_FEATURED_RANDOMIZE',
 						'class' => 'fixed-width-xs',
-						'desc' => $this->l('Select if you want to shuffle the products to be shown in home (default: no).'),
+						'desc' => $this->l('Enable if you wish the products to be displayed randomly (default: no).'),
 						'values' => array(
 							array(
 								'id' => 'active_on',
