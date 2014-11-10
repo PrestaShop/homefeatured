@@ -35,7 +35,7 @@ class HomeFeatured extends Module
 	{
 		$this->name = 'homefeatured';
 		$this->tab = 'front_office_features';
-		$this->version = '1.6';
+		$this->version = '1.6.2';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
 
@@ -87,7 +87,7 @@ class HomeFeatured extends Module
 			$cat = Tools::getValue('HOME_FEATURED_CAT');
 			if (!Validate::isInt($cat) || $cat <= 0)
 				$errors[] = $this->l('The category ID is invalid. Please choose an existing category ID.');
-				
+
 			$rand = Tools::getValue('HOME_FEATURED_RANDOMIZE');
 			if (!Validate::isBool($rand))
 				$errors[] = $this->l('Invalid value for the "randomize" flag.');
@@ -214,7 +214,7 @@ class HomeFeatured extends Module
 						'class' => 'fixed-width-xs',
 						'desc' => $this->l('Choose the category ID of the products that you would like to display on homepage (default: 2 for "Home").'),
 					),
-					array( 
+					array(
 						'type' => 'switch',
 						'label' => $this->l('Randomly display featured products'),
 						'name' => 'HOME_FEATURED_RANDOMIZE',
