@@ -187,7 +187,7 @@ class HomeFeatured extends Module
 	public function _clearCache($template, $cache_id = NULL, $compile_id = NULL)
 	{
 		parent::_clearCache('homefeatured.tpl');
-		parent::_clearCache('tab.tpl', $this->getCacheId('homefeatured-tab'));
+		parent::_clearCache('tab.tpl', 'homefeatured-tab');
 	}
 
 	public function renderForm()
