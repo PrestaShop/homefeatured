@@ -35,7 +35,7 @@ class HomeFeatured extends Module
 	{
 		$this->name = 'homefeatured';
 		$this->tab = 'front_office_features';
-		$this->version = '1.7.0';
+		$this->version = '1.8.0';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
 
