@@ -134,7 +134,7 @@ class HomeFeatured extends Module
 			'actionProductListModifier',
 			array(
 				'nb_products' => null,
-				'cat_products' => &HomeFeatured::$cache_products,
+				'cat_products' => &HomeFeatured::$cache_products
 			)
 		);
 
