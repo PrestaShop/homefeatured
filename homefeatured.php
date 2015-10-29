@@ -53,6 +53,7 @@ class HomeFeatured extends Module
 		Configuration::updateValue('HOME_FEATURED_NBR', 8);
 		Configuration::updateValue('HOME_FEATURED_CAT', (int)Context::getContext()->shop->getCategory());
 		Configuration::updateValue('HOME_FEATURED_RANDOMIZE', false);
+		Configuration::updateValue('HOME_FEATURED_ORDER_WAY', false);
 
 		if (!parent::install()
 			|| !$this->registerHook('header')
@@ -92,6 +93,9 @@ class HomeFeatured extends Module
 			$rand = Tools::getValue('HOME_FEATURED_RANDOMIZE');
 			if (!Validate::isBool($rand))
 				$errors[] = $this->l('Invalid value for the "randomize" flag.');
+			$order_way = Tools::getValue('HOME_FEATURED_ORDER_WAY');
+			if (!in_array($order_way, array('ASC', 'DESC')))
+				$errors[] = $this->l('Invalid value for the "order way" flag.');
 			if (isset($errors) && count($errors))
 				$output = $this->displayError(implode('<br />', $errors));
 			else
@@ -99,6 +103,7 @@ class HomeFeatured extends Module
 				Configuration::updateValue('HOME_FEATURED_NBR', (int)$nbr);
 				Configuration::updateValue('HOME_FEATURED_CAT', (int)$cat);
 				Configuration::updateValue('HOME_FEATURED_RANDOMIZE', (bool)$rand);
+				Configuration::updateValue('HOME_FEATURED_ORDER_WAY', $order_way);
 				Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
 				$output = $this->displayConfirmation($this->l('Your settings have been updated.'));
 			}
@@ -128,7 +133,7 @@ class HomeFeatured extends Module
 			if (Configuration::get('HOME_FEATURED_RANDOMIZE'))
 				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), null, null, false, true, true, ($nb ? $nb : 8));
 			else
-				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position');
+				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position', Configuration::get('HOME_FEATURED_ORDER_WAY'));
 		}
 
 		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products))
@@ -234,6 +239,25 @@ class HomeFeatured extends Module
 							)
 						),
 					),
+					array(
+						'type' => 'radio',
+						'label' => $this->l('Order Way'),
+						'name' => 'HOME_FEATURED_ORDER_WAY',
+						// 'class' => 'fixed-width-xs',
+						'desc' => $this->l('If not random, should products be ordered by ascending or descending order of ID (default: ascending)?'),
+						'values' => array(
+							array(
+								'id' => 'order_asc',
+								'value' => 'ASC',
+								'label' => 'ASCENDING'
+							),
+							array(
+								'id' => 'order_desc',
+								'value' => 'DESC',
+								'label' => $this->l('DESCENDING')
+							)
+						),
+          ),
 				),
 				'submit' => array(
 					'title' => $this->l('Save'),
@@ -268,6 +292,7 @@ class HomeFeatured extends Module
 			'HOME_FEATURED_NBR' => Tools::getValue('HOME_FEATURED_NBR', (int)Configuration::get('HOME_FEATURED_NBR')),
 			'HOME_FEATURED_CAT' => Tools::getValue('HOME_FEATURED_CAT', (int)Configuration::get('HOME_FEATURED_CAT')),
 			'HOME_FEATURED_RANDOMIZE' => Tools::getValue('HOME_FEATURED_RANDOMIZE', (bool)Configuration::get('HOME_FEATURED_RANDOMIZE')),
+			'HOME_FEATURED_ORDER_WAY' => Tools::getValue('HOME_FEATURED_ORDER_WAY', Configuration::get('HOME_FEATURED_ORDER_WAY')),
 		);
 	}
 }
