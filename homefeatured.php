@@ -104,8 +104,8 @@ class HomeFeatured extends Module
 				$output = $this->displayError(implode('<br />', $errors));
             }
 			else {
-				Configuration::updateValue('HOME_FEATURED_NBR', (int)$number_of_products_to_display);
-				Configuration::updateValue('HOME_FEATURED_CAT', (int)$category_id);
+				Configuration::updateValue('HOME_FEATURED_CAT', $category_id);
+				Configuration::updateValue('HOME_FEATURED_NBR', $number_of_products_to_display);
 				Configuration::updateValue('HOME_FEATURED_RANDOMIZE', (bool)$rand);
 				Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
 				$output = $this->displayConfirmation($this->l('Your settings have been updated.'));
