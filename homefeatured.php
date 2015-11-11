@@ -47,6 +47,11 @@ class HomeFeatured extends Module
 		$this->description = $this->l('Displays featured products in the central column of your homepage.');
 	}
 
+    /**
+    * Module installation
+    *
+    * @return bool
+    */
 	public function install()
 	{
 		$this->_clearCache('*');
@@ -54,18 +59,14 @@ class HomeFeatured extends Module
 		Configuration::updateValue('HOME_FEATURED_CAT', (int)Context::getContext()->shop->getCategory());
 		Configuration::updateValue('HOME_FEATURED_RANDOMIZE', false);
 
-		if (!parent::install()
-			|| !$this->registerHook('header')
-			|| !$this->registerHook('addproduct')
-			|| !$this->registerHook('updateproduct')
-			|| !$this->registerHook('deleteproduct')
-			|| !$this->registerHook('categoryUpdate')
-			|| !$this->registerHook('displayHomeTab')
-			|| !$this->registerHook('displayHomeTabContent')
-		)
-			return false;
-
-		return true;
+		return parent::install()
+			&& $this->registerHook('header')
+			&& $this->registerHook('addproduct')
+			&& $this->registerHook('updateproduct')
+			&& $this->registerHook('deleteproduct')
+			&& $this->registerHook('categoryUpdate')
+			&& $this->registerHook('displayHomeTab')
+			&& $this->registerHook('displayHomeTabContent');
 	}
 
 	public function uninstall()
