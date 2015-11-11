@@ -76,6 +76,11 @@ class HomeFeatured extends Module
 		return parent::uninstall();
 	}
 
+    /**
+    * Module configuration page contents
+    *
+    * @return string html contents to display
+    */
 	public function getContent()
 	{
 		$output = '';
