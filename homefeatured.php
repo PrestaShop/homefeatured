@@ -87,8 +87,9 @@ class HomeFeatured extends Module
 		$errors = array();
 		if (Tools::isSubmit('submitHomeFeatured')) {
 			$number_of_products_to_display = Tools::getValue('HOME_FEATURED_NBR');
-			if (!Validate::isInt($number_of_products_to_display) || $number_of_products_to_display <= 0)
+			if (!Validate::isInt($number_of_products_to_display) || $number_of_products_to_display <= 0) {
 				$errors[] = $this->l('The number of products is invalid. Please enter a positive number.');
+            }
 
 			$cat = Tools::getValue('HOME_FEATURED_CAT');
 			if (!Validate::isInt($cat) || $cat <= 0) {
@@ -103,8 +104,8 @@ class HomeFeatured extends Module
 				$output = $this->displayError(implode('<br />', $errors));
             }
 			else {
-				Configuration::updateValue('HOME_FEATURED_CAT', (int)$cat);
 				Configuration::updateValue('HOME_FEATURED_NBR', (int)$number_of_products_to_display);
+				Configuration::updateValue('HOME_FEATURED_CAT', (int)$category_id);
 				Configuration::updateValue('HOME_FEATURED_RANDOMIZE', (bool)$rand);
 				Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
 				$output = $this->displayConfirmation($this->l('Your settings have been updated.'));
