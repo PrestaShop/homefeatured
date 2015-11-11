@@ -36,6 +36,11 @@ class HomeFeatured extends Module
     */
 	protected static $cache_products = null;
 
+    /**
+    * @var int number of products to display if not set in configuration
+    */
+    const DEFAULT_PRODUCTS_NUMBER = 8;
+
 	public function __construct()
 	{
 		$this->name = 'homefeatured';
@@ -59,7 +64,7 @@ class HomeFeatured extends Module
 	public function install()
 	{
 		$this->_clearCache('*');
-		Configuration::updateValue('HOME_FEATURED_NBR', 8);
+		Configuration::updateValue('HOME_FEATURED_NBR', HomeFeatured::DEFAULT_PRODUCTS_NUMBER);
 		Configuration::updateValue('HOME_FEATURED_CAT', (int)Context::getContext()->shop->getCategory());
 		Configuration::updateValue('HOME_FEATURED_RANDOMIZE', false);
 
@@ -141,7 +146,7 @@ class HomeFeatured extends Module
 	{
 		if (is_null(HomeFeatured::$cache_products)) {
 			$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'), (int)Context::getContext()->language->id);
-			$number_of_products_to_display = (int)Configuration::get('HOME_FEATURED_NBR') ? (int)Configuration::get('HOME_FEATURED_NBR') : 8;
+			$number_of_products_to_display = (int)Configuration::get('HOME_FEATURED_NBR') ? (int)Configuration::get('HOME_FEATURED_NBR') : HomeFeatured::DEFAULT_PRODUCTS_NUMBER;
 			if (Configuration::get('HOME_FEATURED_RANDOMIZE')) {
 				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, $number_of_products_to_display, null, null, false, true, true, $number_of_products_to_display);
             }
@@ -225,7 +230,7 @@ class HomeFeatured extends Module
 						'label' => $this->l('Number of products to be displayed'),
 						'name' => 'HOME_FEATURED_NBR',
 						'class' => 'fixed-width-xs',
-						'desc' => $this->l('Set the number of products that you would like to display on homepage (default: 8).'),
+						'desc' => sprintf( $this->l('Set the number of products that you would like to display on homepage (default: %s).'), HomeFeatured::DEFAULT_PRODUCTS_NUMBER),
 					),
 					array(
 						'type' => 'text',
