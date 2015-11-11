@@ -30,7 +30,11 @@ if (!defined('_PS_VERSION_')) {
 
 class HomeFeatured extends Module
 {
-	protected static $cache_products;
+    /**
+    * null before first cacheProducts, array after
+    * @var mixed null|array products request results
+    */
+	protected static $cache_products = null;
 
 	public function __construct()
 	{
