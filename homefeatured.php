@@ -128,7 +128,12 @@ class HomeFeatured extends Module
 		$this->context->controller->addCSS(($this->_path).'css/homefeatured.css', 'all');
 	}
 
-	public function _cacheProducts()
+    /**
+    * Cache products request results in self::$cache_products
+    *
+    * @return mixed false|void
+    */
+	protected function cacheProducts()
 	{
 		if (!isset(HomeFeatured::$cache_products)) {
 			$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'), (int)Context::getContext()->language->id);
@@ -149,7 +154,7 @@ class HomeFeatured extends Module
 	public function hookDisplayHomeTab($params)
 	{
 		if (!$this->isCached('tab.tpl', $this->getCacheId('homefeatured-tab'))) {
-			$this->_cacheProducts();
+			$this->cacheProducts();
         }
 
 		return $this->display(__FILE__, 'tab.tpl', $this->getCacheId('homefeatured-tab'));
@@ -159,7 +164,7 @@ class HomeFeatured extends Module
 	{
 		if (!$this->isCached('homefeatured.tpl', $this->getCacheId()))
 		{
-			$this->_cacheProducts();
+			$this->cacheProducts();
 			$this->smarty->assign(
 				array(
 					'products' => HomeFeatured::$cache_products,
