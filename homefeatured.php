@@ -141,12 +141,12 @@ class HomeFeatured extends Module
 	{
 		if (is_null(HomeFeatured::$cache_products)) {
 			$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'), (int)Context::getContext()->language->id);
-			$nb = (int)Configuration::get('HOME_FEATURED_NBR');
+			$number_of_products_to_display = (int)Configuration::get('HOME_FEATURED_NBR');
 			if (Configuration::get('HOME_FEATURED_RANDOMIZE')) {
-				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), null, null, false, true, true, ($nb ? $nb : 8));
+				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($number_of_products_to_display ? $number_of_products_to_display : 8), null, null, false, true, true, ($number_of_products_to_display ? $number_of_products_to_display : 8));
             }
             else {
-				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position');
+				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($number_of_products_to_display ? $number_of_products_to_display : 8), 'position');
             }
             // ensure HomeFeatured::$cache_products is always an array
             HomeFeatured::$cache_products = is_array(HomeFeatured::$cache_products) ? HomeFeatured::$cache_products : array();
