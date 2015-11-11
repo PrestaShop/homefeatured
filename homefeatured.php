@@ -94,7 +94,7 @@ class HomeFeatured extends Module
 			if (!Validate::isBool($rand)) {
 				$errors[] = $this->l('Invalid value for the "randomize" flag.');
             }
-			if (isset($errors) && count($errors)) {
+			if ($errors) {
 				$output = $this->displayError(implode('<br />', $errors));
             }
 			else {
