@@ -135,11 +135,11 @@ class HomeFeatured extends Module
     /**
     * Cache products request results in self::$cache_products
     *
-    * @return mixed false|void
+    * @return void
     */
 	protected function setCacheProducts()
 	{
-		if (!isset(HomeFeatured::$cache_products)) {
+		if (is_null(HomeFeatured::$cache_products)) {
 			$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'), (int)Context::getContext()->language->id);
 			$nb = (int)Configuration::get('HOME_FEATURED_NBR');
 			if (Configuration::get('HOME_FEATURED_RANDOMIZE')) {
@@ -148,11 +148,9 @@ class HomeFeatured extends Module
             else {
 				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position');
             }
+            // ensure HomeFeatured::$cache_products is always an array
+            HomeFeatured::$cache_products = is_array(HomeFeatured::$cache_products) ? HomeFeatured::$cache_products : array();
 		}
-
-		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products)) {
-			return false;
-        }
 	}
 
 	public function hookDisplayHomeTab($params)
