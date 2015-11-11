@@ -24,8 +24,9 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-if (!defined('_PS_VERSION_'))
+if (!defined('_PS_VERSION_')) {
 	exit;
+}
 
 class HomeFeatured extends Module
 {
@@ -78,23 +79,24 @@ class HomeFeatured extends Module
 	{
 		$output = '';
 		$errors = array();
-		if (Tools::isSubmit('submitHomeFeatured'))
-		{
+		if (Tools::isSubmit('submitHomeFeatured')) {
 			$nbr = Tools::getValue('HOME_FEATURED_NBR');
 			if (!Validate::isInt($nbr) || $nbr <= 0)
 			$errors[] = $this->l('The number of products is invalid. Please enter a positive number.');
 
 			$cat = Tools::getValue('HOME_FEATURED_CAT');
-			if (!Validate::isInt($cat) || $cat <= 0)
+			if (!Validate::isInt($cat) || $cat <= 0) {
 				$errors[] = $this->l('The category ID is invalid. Please choose an existing category ID.');
+            }
 
 			$rand = Tools::getValue('HOME_FEATURED_RANDOMIZE');
-			if (!Validate::isBool($rand))
+			if (!Validate::isBool($rand)) {
 				$errors[] = $this->l('Invalid value for the "randomize" flag.');
-			if (isset($errors) && count($errors))
+            }
+			if (isset($errors) && count($errors)) {
 				$output = $this->displayError(implode('<br />', $errors));
-			else
-			{
+            }
+			else {
 				Configuration::updateValue('HOME_FEATURED_NBR', (int)$nbr);
 				Configuration::updateValue('HOME_FEATURED_CAT', (int)$cat);
 				Configuration::updateValue('HOME_FEATURED_RANDOMIZE', (bool)$rand);
@@ -113,31 +115,35 @@ class HomeFeatured extends Module
 
 	public function hookHeader($params)
 	{
-		if (isset($this->context->controller->php_self) && $this->context->controller->php_self == 'index')
+		if (isset($this->context->controller->php_self) && $this->context->controller->php_self == 'index') {
 			$this->context->controller->addCSS(_THEME_CSS_DIR_.'product_list.css');
+        }
 		$this->context->controller->addCSS(($this->_path).'css/homefeatured.css', 'all');
 	}
 
 	public function _cacheProducts()
 	{
-		if (!isset(HomeFeatured::$cache_products))
-		{
+		if (!isset(HomeFeatured::$cache_products)) {
 			$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'), (int)Context::getContext()->language->id);
 			$nb = (int)Configuration::get('HOME_FEATURED_NBR');
-			if (Configuration::get('HOME_FEATURED_RANDOMIZE'))
+			if (Configuration::get('HOME_FEATURED_RANDOMIZE')) {
 				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), null, null, false, true, true, ($nb ? $nb : 8));
-			else
+            }
+            else {
 				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position');
+            }
 		}
 
-		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products))
+		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products)) {
 			return false;
+        }
 	}
 
 	public function hookDisplayHomeTab($params)
 	{
-		if (!$this->isCached('tab.tpl', $this->getCacheId('homefeatured-tab')))
+		if (!$this->isCached('tab.tpl', $this->getCacheId('homefeatured-tab'))) {
 			$this->_cacheProducts();
+        }
 
 		return $this->display(__FILE__, 'tab.tpl', $this->getCacheId('homefeatured-tab'));
 	}
