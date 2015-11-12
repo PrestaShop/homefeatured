@@ -130,7 +130,7 @@ class HomeFeatured extends Module
 				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position');
 		}
 
-		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products))
+		if (empty(HomeFeatured::$cache_products))
 			return false;
 	}
 
