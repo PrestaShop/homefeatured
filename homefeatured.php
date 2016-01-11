@@ -35,9 +35,13 @@ class HomeFeatured extends Module
 	{
 		$this->name = 'homefeatured';
 		$this->tab = 'front_office_features';
-		$this->version = '1.8.0';
+		$this->version = '2.0.0';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
+		$this->ps_versions_compliancy = [
+			'min' => '1.7',
+			'max' => _PS_VERSION_
+		];
 
 		$this->bootstrap = true;
 		parent::__construct();
