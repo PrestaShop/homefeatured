@@ -136,6 +136,8 @@ class HomeFeatured extends Module implements WidgetInterface
 
 		if (Configuration::get('HOME_FEATURED_RANDOMIZE')) {
 			$query->setSortOrder(SortOrder::random());
+		} else {
+			$query->setSortOrder(new SortOrder('product', 'position', 'asc'));
 		}
 
 		$result = $searchProvider->runQuery(
