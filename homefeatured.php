@@ -33,6 +33,7 @@ use PrestaShop\PrestaShop\Adapter\Translator;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
 use PrestaShop\PrestaShop\Core\Business\Product\Search\ProductSearchContext;
 use PrestaShop\PrestaShop\Core\Business\Product\Search\ProductSearchQuery;
+use PrestaShop\PrestaShop\Core\Business\Product\Search\SortOrder;
 
 class HomeFeatured extends Module implements WidgetInterface
 {
@@ -114,22 +115,6 @@ class HomeFeatured extends Module implements WidgetInterface
 
 	public function _cacheProducts()
 	{
-
-
-		// die('k.');
-		/*
-		if (!isset(HomeFeatured::$cache_products))
-		{
-			, (int)Context::getContext()->language->id);
-			$nb = (int)Configuration::get('HOME_FEATURED_NBR');
-			if (Configuration::get('HOME_FEATURED_RANDOMIZE'))
-				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), null, null, false, true, true, ($nb ? $nb : 8));
-			else
-				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position');
-		}
-
-		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products))
-			return false;*/
 	}
 
 	public function getProducts()
@@ -155,10 +140,15 @@ class HomeFeatured extends Module implements WidgetInterface
 			->setPage(1)
 		;
 
+		if (Configuration::get('HOME_FEATURED_RANDOMIZE')) {
+			$query->setSortOrder(SortOrder::random());
+		}
+
 		$result = $searchProvider->runQuery(
 			$context,
 			$query
 		);
+
 
 		$assembler = new ProductAssembler($this->context);
 
@@ -175,6 +165,7 @@ class HomeFeatured extends Module implements WidgetInterface
 				$this->context->language
 			);
 		}
+
 
 		return $products_for_template;
 	}
