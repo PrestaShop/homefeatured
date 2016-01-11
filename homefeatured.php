@@ -28,6 +28,11 @@ if (!defined('_PS_VERSION_'))
 	exit;
 
 use PrestaShop\PrestaShop\Core\Business\Module\WidgetInterface;
+use PrestaShop\PrestaShop\Adapter\Category\CategoryProductSearchProvider;
+use PrestaShop\PrestaShop\Adapter\Translator;
+use PrestaShop\PrestaShop\Adapter\LegacyContext;
+use PrestaShop\PrestaShop\Core\Business\Product\Search\ProductSearchContext;
+use PrestaShop\PrestaShop\Core\Business\Product\Search\ProductSearchQuery;
 
 class HomeFeatured extends Module implements WidgetInterface
 {
@@ -109,11 +114,13 @@ class HomeFeatured extends Module implements WidgetInterface
 
 	public function _cacheProducts()
 	{
-		die();
+
+
+		// die('k.');
 		/*
 		if (!isset(HomeFeatured::$cache_products))
 		{
-			$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'), (int)Context::getContext()->language->id);
+			, (int)Context::getContext()->language->id);
 			$nb = (int)Configuration::get('HOME_FEATURED_NBR');
 			if (Configuration::get('HOME_FEATURED_RANDOMIZE'))
 				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), null, null, false, true, true, ($nb ? $nb : 8));
@@ -123,6 +130,53 @@ class HomeFeatured extends Module implements WidgetInterface
 
 		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products))
 			return false;*/
+	}
+
+	public function getProducts()
+	{
+		$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'));
+
+		$searchProvider = new CategoryProductSearchProvider(
+			new Translator(new LegacyContext),
+			$category
+		);
+
+		$context = new ProductSearchContext($this->context);
+
+		$query = new ProductSearchQuery;
+
+		$nProducts = Configuration::get('HOME_FEATURED_NBR');
+		if ($nProducts < 0) {
+			$nProducts = 12;
+		}
+
+		$query
+			->setResultsPerPage($nProducts)
+			->setPage(1)
+		;
+
+		$result = $searchProvider->runQuery(
+			$context,
+			$query
+		);
+
+		$assembler = new ProductAssembler($this->context);
+
+		$presenterFactory = new ProductPresenterFactory($this->context);
+		$presentationSettings = $presenterFactory->getPresentationSettings();
+		$presenter = $presenterFactory->getPresenter();
+
+		$products_for_template = [];
+
+		foreach ($result->getProducts() as $rawProduct) {
+			$products_for_template[] = $presenter->presentForListing(
+				$presentationSettings,
+				$assembler->assembleProduct($rawProduct),
+				$this->context->language
+			);
+		}
+
+		return $products_for_template;
 	}
 
 	public function hookAddProduct($params)
@@ -233,11 +287,14 @@ class HomeFeatured extends Module implements WidgetInterface
 
 	public function getWidgetVariables($hookName = null, array $configuration = [])
 	{
-		return [];
+		return [
+			'products' => $this->getProducts()
+		];
 	}
 
 	public function renderWidget($hookName = null, array $configuration = [])
 	{
+		$this->_cacheProducts();
 		$this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
 		return $this->display(__FILE__, 'views/templates/hook/homefeatured.tpl');
 	}
