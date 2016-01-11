@@ -37,8 +37,6 @@ use PrestaShop\PrestaShop\Core\Business\Product\Search\SortOrder;
 
 class HomeFeatured extends Module implements WidgetInterface
 {
-	protected static $cache_products;
-
 	public function __construct()
 	{
 		$this->name = 'homefeatured';
@@ -111,10 +109,6 @@ class HomeFeatured extends Module implements WidgetInterface
 		}
 
 		return $output.$this->renderForm();
-	}
-
-	public function _cacheProducts()
-	{
 	}
 
 	public function getProducts()
@@ -192,8 +186,7 @@ class HomeFeatured extends Module implements WidgetInterface
 
 	public function _clearCache($template, $cache_id = NULL, $compile_id = NULL)
 	{
-		parent::_clearCache('homefeatured.tpl');
-		parent::_clearCache('tab.tpl', 'homefeatured-tab');
+		parent::_clearCache('homefeatured.tpl', 'homefeatured');
 	}
 
 	public function renderForm()
@@ -285,8 +278,10 @@ class HomeFeatured extends Module implements WidgetInterface
 
 	public function renderWidget($hookName = null, array $configuration = [])
 	{
-		$this->_cacheProducts();
-		$this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
-		return $this->display(__FILE__, 'views/templates/hook/homefeatured.tpl');
+		if (!$this->isCached('homefeatured.tpl', $this->getCacheId('homefeatured'))) {
+			$this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
+		}
+
+		return $this->display(__FILE__, 'homefeatured.tpl', $this->getCacheId('homefeatured'));
 	}
 }
