@@ -24,8 +24,9 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-if (!defined('_PS_VERSION_'))
-	exit;
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 use PrestaShop\PrestaShop\Core\Business\Module\WidgetInterface;
 use PrestaShop\PrestaShop\Adapter\Category\CategoryProductSearchProvider;
@@ -35,255 +36,254 @@ use PrestaShop\PrestaShop\Core\Business\Product\Search\ProductSearchContext;
 use PrestaShop\PrestaShop\Core\Business\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Business\Product\Search\SortOrder;
 
-class HomeFeatured extends Module implements WidgetInterface
+class homefeatured extends Module implements WidgetInterface
 {
-	public function __construct()
-	{
-		$this->name = 'homefeatured';
-		$this->tab = 'front_office_features';
-		$this->version = '2.0.0';
-		$this->author = 'PrestaShop';
-		$this->need_instance = 0;
-		$this->ps_versions_compliancy = [
-			'min' => '1.7',
-			'max' => _PS_VERSION_
-		];
+    public function __construct()
+    {
+        $this->name = 'homefeatured';
+        $this->tab = 'front_office_features';
+        $this->version = '2.0.0';
+        $this->author = 'PrestaShop';
+        $this->need_instance = 0;
+        $this->ps_versions_compliancy = [
+            'min' => '1.7',
+            'max' => _PS_VERSION_,
+        ];
 
-		$this->bootstrap = true;
-		parent::__construct();
+        $this->bootstrap = true;
+        parent::__construct();
 
-		$this->displayName = $this->l('Featured products on the homepage');
-		$this->description = $this->l('Displays featured products in the central column of your homepage.');
-	}
+        $this->displayName = $this->l('Featured products on the homepage');
+        $this->description = $this->l('Displays featured products in the central column of your homepage.');
+    }
 
-	public function install()
-	{
-		$this->_clearCache('*');
-		Configuration::updateValue('HOME_FEATURED_NBR', 8);
-		Configuration::updateValue('HOME_FEATURED_CAT', (int)Context::getContext()->shop->getCategory());
-		Configuration::updateValue('HOME_FEATURED_RANDOMIZE', false);
+    public function install()
+    {
+        $this->_clearCache('*');
+        Configuration::updateValue('HOME_FEATURED_NBR', 8);
+        Configuration::updateValue('HOME_FEATURED_CAT', (int) Context::getContext()->shop->getCategory());
+        Configuration::updateValue('HOME_FEATURED_RANDOMIZE', false);
 
-		return parent::install()
-			&& $this->registerHook('addproduct')
-			&& $this->registerHook('updateproduct')
-			&& $this->registerHook('deleteproduct')
-			&& $this->registerHook('categoryUpdate')
-			&& $this->registerHook('displayHome')
-		;
-	}
+        return parent::install()
+            && $this->registerHook('addproduct')
+            && $this->registerHook('updateproduct')
+            && $this->registerHook('deleteproduct')
+            && $this->registerHook('categoryUpdate')
+            && $this->registerHook('displayHome')
+        ;
+    }
 
-	public function uninstall()
-	{
-		$this->_clearCache('*');
+    public function uninstall()
+    {
+        $this->_clearCache('*');
 
-		return parent::uninstall();
-	}
+        return parent::uninstall();
+    }
 
-	public function getContent()
-	{
-		$output = '';
-		$errors = array();
-		if (Tools::isSubmit('submitHomeFeatured'))
-		{
-			$nbr = Tools::getValue('HOME_FEATURED_NBR');
-			if (!Validate::isInt($nbr) || $nbr <= 0)
-			$errors[] = $this->l('The number of products is invalid. Please enter a positive number.');
+    public function getContent()
+    {
+        $output = '';
+        $errors = array();
+        if (Tools::isSubmit('submitHomeFeatured')) {
+            $nbr = Tools::getValue('HOME_FEATURED_NBR');
+            if (!Validate::isInt($nbr) || $nbr <= 0) {
+                $errors[] = $this->l('The number of products is invalid. Please enter a positive number.');
+            }
 
-			$cat = Tools::getValue('HOME_FEATURED_CAT');
-			if (!Validate::isInt($cat) || $cat <= 0)
-				$errors[] = $this->l('The category ID is invalid. Please choose an existing category ID.');
+            $cat = Tools::getValue('HOME_FEATURED_CAT');
+            if (!Validate::isInt($cat) || $cat <= 0) {
+                $errors[] = $this->l('The category ID is invalid. Please choose an existing category ID.');
+            }
 
-			$rand = Tools::getValue('HOME_FEATURED_RANDOMIZE');
-			if (!Validate::isBool($rand))
-				$errors[] = $this->l('Invalid value for the "randomize" flag.');
-			if (isset($errors) && count($errors))
-				$output = $this->displayError(implode('<br />', $errors));
-			else
-			{
-				Configuration::updateValue('HOME_FEATURED_NBR', (int)$nbr);
-				Configuration::updateValue('HOME_FEATURED_CAT', (int)$cat);
-				Configuration::updateValue('HOME_FEATURED_RANDOMIZE', (bool)$rand);
-				Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
-				$output = $this->displayConfirmation($this->l('Your settings have been updated.'));
-			}
-		}
+            $rand = Tools::getValue('HOME_FEATURED_RANDOMIZE');
+            if (!Validate::isBool($rand)) {
+                $errors[] = $this->l('Invalid value for the "randomize" flag.');
+            }
+            if (isset($errors) && count($errors)) {
+                $output = $this->displayError(implode('<br />', $errors));
+            } else {
+                Configuration::updateValue('HOME_FEATURED_NBR', (int) $nbr);
+                Configuration::updateValue('HOME_FEATURED_CAT', (int) $cat);
+                Configuration::updateValue('HOME_FEATURED_RANDOMIZE', (bool) $rand);
+                Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));
+                $output = $this->displayConfirmation($this->l('Your settings have been updated.'));
+            }
+        }
 
-		return $output.$this->renderForm();
-	}
+        return $output.$this->renderForm();
+    }
 
-	public function getProducts()
-	{
-		$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'));
+    public function getProducts()
+    {
+        $category = new Category((int) Configuration::get('HOME_FEATURED_CAT'));
 
-		$searchProvider = new CategoryProductSearchProvider(
-			new Translator(new LegacyContext),
-			$category
-		);
+        $searchProvider = new CategoryProductSearchProvider(
+            new Translator(new LegacyContext()),
+            $category
+        );
 
-		$context = new ProductSearchContext($this->context);
+        $context = new ProductSearchContext($this->context);
 
-		$query = new ProductSearchQuery;
+        $query = new ProductSearchQuery();
 
-		$nProducts = Configuration::get('HOME_FEATURED_NBR');
-		if ($nProducts < 0) {
-			$nProducts = 12;
-		}
+        $nProducts = Configuration::get('HOME_FEATURED_NBR');
+        if ($nProducts < 0) {
+            $nProducts = 12;
+        }
 
-		$query
-			->setResultsPerPage($nProducts)
-			->setPage(1)
-		;
+        $query
+            ->setResultsPerPage($nProducts)
+            ->setPage(1)
+        ;
 
-		if (Configuration::get('HOME_FEATURED_RANDOMIZE')) {
-			$query->setSortOrder(SortOrder::random());
-		} else {
-			$query->setSortOrder(new SortOrder('product', 'position', 'asc'));
-		}
+        if (Configuration::get('HOME_FEATURED_RANDOMIZE')) {
+            $query->setSortOrder(SortOrder::random());
+        } else {
+            $query->setSortOrder(new SortOrder('product', 'position', 'asc'));
+        }
 
-		$result = $searchProvider->runQuery(
-			$context,
-			$query
-		);
+        $result = $searchProvider->runQuery(
+            $context,
+            $query
+        );
 
+        $assembler = new ProductAssembler($this->context);
 
-		$assembler = new ProductAssembler($this->context);
+        $presenterFactory = new ProductPresenterFactory($this->context);
+        $presentationSettings = $presenterFactory->getPresentationSettings();
+        $presenter = $presenterFactory->getPresenter();
 
-		$presenterFactory = new ProductPresenterFactory($this->context);
-		$presentationSettings = $presenterFactory->getPresentationSettings();
-		$presenter = $presenterFactory->getPresenter();
+        $products_for_template = [];
 
-		$products_for_template = [];
+        foreach ($result->getProducts() as $rawProduct) {
+            $products_for_template[] = $presenter->presentForListing(
+                $presentationSettings,
+                $assembler->assembleProduct($rawProduct),
+                $this->context->language
+            );
+        }
 
-		foreach ($result->getProducts() as $rawProduct) {
-			$products_for_template[] = $presenter->presentForListing(
-				$presentationSettings,
-				$assembler->assembleProduct($rawProduct),
-				$this->context->language
-			);
-		}
+        return $products_for_template;
+    }
 
+    public function hookAddProduct($params)
+    {
+        $this->_clearCache('*');
+    }
 
-		return $products_for_template;
-	}
+    public function hookUpdateProduct($params)
+    {
+        $this->_clearCache('*');
+    }
 
-	public function hookAddProduct($params)
-	{
-		$this->_clearCache('*');
-	}
+    public function hookDeleteProduct($params)
+    {
+        $this->_clearCache('*');
+    }
 
-	public function hookUpdateProduct($params)
-	{
-		$this->_clearCache('*');
-	}
+    public function hookCategoryUpdate($params)
+    {
+        $this->_clearCache('*');
+    }
 
-	public function hookDeleteProduct($params)
-	{
-		$this->_clearCache('*');
-	}
+    public function _clearCache($template, $cache_id = null, $compile_id = null)
+    {
+        parent::_clearCache('homefeatured.tpl', 'homefeatured');
+    }
 
-	public function hookCategoryUpdate($params)
-	{
-		$this->_clearCache('*');
-	}
+    public function renderForm()
+    {
+        $fields_form = array(
+            'form' => array(
+                'legend' => array(
+                    'title' => $this->l('Settings'),
+                    'icon' => 'icon-cogs',
+                ),
+                'description' => $this->l('To add products to your homepage, simply add them to the corresponding product category (default: "Home").'),
+                'input' => array(
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Number of products to be displayed'),
+                        'name' => 'HOME_FEATURED_NBR',
+                        'class' => 'fixed-width-xs',
+                        'desc' => $this->l('Set the number of products that you would like to display on homepage (default: 8).'),
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Category from which to pick products to be displayed'),
+                        'name' => 'HOME_FEATURED_CAT',
+                        'class' => 'fixed-width-xs',
+                        'desc' => $this->l('Choose the category ID of the products that you would like to display on homepage (default: 2 for "Home").'),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Randomly display featured products'),
+                        'name' => 'HOME_FEATURED_RANDOMIZE',
+                        'class' => 'fixed-width-xs',
+                        'desc' => $this->l('Enable if you wish the products to be displayed randomly (default: no).'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Yes'),
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('No'),
+                            ),
+                        ),
+                    ),
+                ),
+                'submit' => array(
+                    'title' => $this->l('Save'),
+                ),
+            ),
+        );
 
-	public function _clearCache($template, $cache_id = NULL, $compile_id = NULL)
-	{
-		parent::_clearCache('homefeatured.tpl', 'homefeatured');
-	}
+        $helper = new HelperForm();
+        $helper->show_toolbar = false;
+        $helper->table = $this->table;
+        $lang = new Language((int) Configuration::get('PS_LANG_DEFAULT'));
+        $helper->default_form_language = $lang->id;
+        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') : 0;
+        $this->fields_form = array();
+        $helper->id = (int) Tools::getValue('id_carrier');
+        $helper->identifier = $this->identifier;
+        $helper->submit_action = 'submitHomeFeatured';
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $helper->tpl_vars = array(
+            'fields_value' => $this->getConfigFieldsValues(),
+            'languages' => $this->context->controller->getLanguages(),
+            'id_language' => $this->context->language->id,
+        );
 
-	public function renderForm()
-	{
-		$fields_form = array(
-			'form' => array(
-				'legend' => array(
-					'title' => $this->l('Settings'),
-					'icon' => 'icon-cogs'
-				),
-				'description' => $this->l('To add products to your homepage, simply add them to the corresponding product category (default: "Home").'),
-				'input' => array(
-					array(
-						'type' => 'text',
-						'label' => $this->l('Number of products to be displayed'),
-						'name' => 'HOME_FEATURED_NBR',
-						'class' => 'fixed-width-xs',
-						'desc' => $this->l('Set the number of products that you would like to display on homepage (default: 8).'),
-					),
-					array(
-						'type' => 'text',
-						'label' => $this->l('Category from which to pick products to be displayed'),
-						'name' => 'HOME_FEATURED_CAT',
-						'class' => 'fixed-width-xs',
-						'desc' => $this->l('Choose the category ID of the products that you would like to display on homepage (default: 2 for "Home").'),
-					),
-					array(
-						'type' => 'switch',
-						'label' => $this->l('Randomly display featured products'),
-						'name' => 'HOME_FEATURED_RANDOMIZE',
-						'class' => 'fixed-width-xs',
-						'desc' => $this->l('Enable if you wish the products to be displayed randomly (default: no).'),
-						'values' => array(
-							array(
-								'id' => 'active_on',
-								'value' => 1,
-								'label' => $this->l('Yes')
-							),
-							array(
-								'id' => 'active_off',
-								'value' => 0,
-								'label' => $this->l('No')
-							)
-						),
-					),
-				),
-				'submit' => array(
-					'title' => $this->l('Save'),
-				)
-			),
-		);
+        return $helper->generateForm(array($fields_form));
+    }
 
-		$helper = new HelperForm();
-		$helper->show_toolbar = false;
-		$helper->table = $this->table;
-		$lang = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
-		$helper->default_form_language = $lang->id;
-		$helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') : 0;
-		$this->fields_form = array();
-		$helper->id = (int)Tools::getValue('id_carrier');
-		$helper->identifier = $this->identifier;
-		$helper->submit_action = 'submitHomeFeatured';
-		$helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
-		$helper->token = Tools::getAdminTokenLite('AdminModules');
-		$helper->tpl_vars = array(
-			'fields_value' => $this->getConfigFieldsValues(),
-			'languages' => $this->context->controller->getLanguages(),
-			'id_language' => $this->context->language->id
-		);
+    public function getConfigFieldsValues()
+    {
+        return array(
+            'HOME_FEATURED_NBR' => Tools::getValue('HOME_FEATURED_NBR', (int) Configuration::get('HOME_FEATURED_NBR')),
+            'HOME_FEATURED_CAT' => Tools::getValue('HOME_FEATURED_CAT', (int) Configuration::get('HOME_FEATURED_CAT')),
+            'HOME_FEATURED_RANDOMIZE' => Tools::getValue('HOME_FEATURED_RANDOMIZE', (bool) Configuration::get('HOME_FEATURED_RANDOMIZE')),
+        );
+    }
 
-		return $helper->generateForm(array($fields_form));
-	}
+    public function getWidgetVariables($hookName = null, array $configuration = [])
+    {
+        return [
+            'products' => $this->getProducts(),
+        ];
+    }
 
-	public function getConfigFieldsValues()
-	{
-		return array(
-			'HOME_FEATURED_NBR' => Tools::getValue('HOME_FEATURED_NBR', (int)Configuration::get('HOME_FEATURED_NBR')),
-			'HOME_FEATURED_CAT' => Tools::getValue('HOME_FEATURED_CAT', (int)Configuration::get('HOME_FEATURED_CAT')),
-			'HOME_FEATURED_RANDOMIZE' => Tools::getValue('HOME_FEATURED_RANDOMIZE', (bool)Configuration::get('HOME_FEATURED_RANDOMIZE')),
-		);
-	}
+    public function renderWidget($hookName = null, array $configuration = [])
+    {
+        if (!$this->isCached('homefeatured.tpl', $this->getCacheId('homefeatured'))) {
+            $this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
+        }
 
-	public function getWidgetVariables($hookName = null, array $configuration = [])
-	{
-		return [
-			'products' => $this->getProducts()
-		];
-	}
-
-	public function renderWidget($hookName = null, array $configuration = [])
-	{
-		if (!$this->isCached('homefeatured.tpl', $this->getCacheId('homefeatured'))) {
-			$this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
-		}
-
-		return $this->display(__FILE__, 'homefeatured.tpl', $this->getCacheId('homefeatured'));
-	}
+        return $this->display(__FILE__, 'homefeatured.tpl', $this->getCacheId('homefeatured'));
+    }
 }
