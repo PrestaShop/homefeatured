@@ -27,7 +27,9 @@
 if (!defined('_PS_VERSION_'))
 	exit;
 
-class HomeFeatured extends Module
+use PrestaShop\PrestaShop\Core\Business\Module\WidgetInterface;
+
+class HomeFeatured extends Module implements WidgetInterface
 {
 	protected static $cache_products;
 
@@ -57,18 +59,13 @@ class HomeFeatured extends Module
 		Configuration::updateValue('HOME_FEATURED_CAT', (int)Context::getContext()->shop->getCategory());
 		Configuration::updateValue('HOME_FEATURED_RANDOMIZE', false);
 
-		if (!parent::install()
-			|| !$this->registerHook('header')
-			|| !$this->registerHook('addproduct')
-			|| !$this->registerHook('updateproduct')
-			|| !$this->registerHook('deleteproduct')
-			|| !$this->registerHook('categoryUpdate')
-			|| !$this->registerHook('displayHomeTab')
-			|| !$this->registerHook('displayHomeTabContent')
-		)
-			return false;
-
-		return true;
+		return parent::install()
+			&& $this->registerHook('addproduct')
+			&& $this->registerHook('updateproduct')
+			&& $this->registerHook('deleteproduct')
+			&& $this->registerHook('categoryUpdate')
+			&& $this->registerHook('displayHome')
+		;
 	}
 
 	public function uninstall()
@@ -110,20 +107,10 @@ class HomeFeatured extends Module
 		return $output.$this->renderForm();
 	}
 
-	public function hookDisplayHeader($params)
-	{
-		$this->hookHeader($params);
-	}
-
-	public function hookHeader($params)
-	{
-		if (isset($this->context->controller->php_self) && $this->context->controller->php_self == 'index')
-			$this->context->controller->addCSS(_THEME_CSS_DIR_.'product_list.css');
-		$this->context->controller->addCSS(($this->_path).'css/homefeatured.css', 'all');
-	}
-
 	public function _cacheProducts()
 	{
+		die();
+		/*
 		if (!isset(HomeFeatured::$cache_products))
 		{
 			$category = new Category((int)Configuration::get('HOME_FEATURED_CAT'), (int)Context::getContext()->language->id);
@@ -135,37 +122,7 @@ class HomeFeatured extends Module
 		}
 
 		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products))
-			return false;
-	}
-
-	public function hookDisplayHomeTab($params)
-	{
-		if (!$this->isCached('tab.tpl', $this->getCacheId('homefeatured-tab')))
-			$this->_cacheProducts();
-
-		return $this->display(__FILE__, 'tab.tpl', $this->getCacheId('homefeatured-tab'));
-	}
-
-	public function hookDisplayHome($params)
-	{
-		if (!$this->isCached('homefeatured.tpl', $this->getCacheId()))
-		{
-			$this->_cacheProducts();
-			$this->smarty->assign(
-				array(
-					'products' => HomeFeatured::$cache_products,
-					'add_prod_display' => Configuration::get('PS_ATTRIBUTE_CATEGORY_DISPLAY'),
-					'homeSize' => Image::getSize(ImageType::getFormatedName('home')),
-				)
-			);
-		}
-
-		return $this->display(__FILE__, 'homefeatured.tpl', $this->getCacheId());
-	}
-
-	public function hookDisplayHomeTabContent($params)
-	{
-		return $this->hookDisplayHome($params);
+			return false;*/
 	}
 
 	public function hookAddProduct($params)
@@ -272,5 +229,16 @@ class HomeFeatured extends Module
 			'HOME_FEATURED_CAT' => Tools::getValue('HOME_FEATURED_CAT', (int)Configuration::get('HOME_FEATURED_CAT')),
 			'HOME_FEATURED_RANDOMIZE' => Tools::getValue('HOME_FEATURED_RANDOMIZE', (bool)Configuration::get('HOME_FEATURED_RANDOMIZE')),
 		);
+	}
+
+	public function getWidgetVariables($hookName = null, array $configuration = [])
+	{
+		return [];
+	}
+
+	public function renderWidget($hookName = null, array $configuration = [])
+	{
+		$this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
+		return $this->display(__FILE__, 'views/templates/hook/homefeatured.tpl');
 	}
 }
