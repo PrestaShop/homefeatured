@@ -44,6 +44,7 @@ class HomeFeatured extends Module
 
 		$this->displayName = $this->l('Featured products on the homepage');
 		$this->description = $this->l('Displays featured products in the central column of your homepage.');
+		$this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.6.99.99');
 	}
 
 	public function install()
