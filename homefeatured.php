@@ -187,8 +187,8 @@ class HomeFeatured extends Module
 
 	public function _clearCache($template, $cache_id = NULL, $compile_id = NULL)
 	{
-		parent::_clearCache('homefeatured.tpl');
-		parent::_clearCache('tab.tpl', 'homefeatured-tab');
+		Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured.tpl'));		
+		Tools::clearCache(Context::getContext()->smarty, $this->getTemplatePath('homefeatured-tab.tpl'));	
 	}
 
 	public function renderForm()
