@@ -131,6 +131,14 @@ class HomeFeatured extends Module
 				HomeFeatured::$cache_products = $category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position');
 		}
 
+		Hook::exec(
+			'actionProductListModifier',
+			array(
+				'nb_products' => null,
+				'cat_products' => &HomeFeatured::$cache_products
+			)
+		);
+
 		if (HomeFeatured::$cache_products === false || empty(HomeFeatured::$cache_products))
 			return false;
 	}
